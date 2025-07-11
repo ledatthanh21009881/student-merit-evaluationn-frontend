@@ -11,6 +11,7 @@ import LoginPage from './pages/LoginPage';
 import StudentProfile from './pages/StudentProfile';
 import PrivateRoute from './components/PrivateRoute';
 import AdminLayout from './pages/MenuLeft';
+import CriteriaManagement from './pages/CriteriaManagement';
 
 const App: React.FC = () => {
   return (
@@ -30,8 +31,8 @@ const App: React.FC = () => {
               </PrivateRoute>
             }
           >
-            {/* Chỉ giữ đúng 2 route cần thiết */}
             <Route path="/profile" element={<StudentProfile />} />
+            <Route path="/criteria-management" element={<CriteriaManagement />} />
           </Route>
 
           {/* Fallback nếu không đúng route */}

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Layout, Menu, Dropdown, Typography } from 'antd';
-import { LogoutOutlined, UserOutlined, LockOutlined } from '@ant-design/icons';
+import { UserOutlined, TrophyOutlined, LogoutOutlined, LockOutlined } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 
 const { Sider, Header, Content } = Layout;
@@ -53,6 +53,11 @@ const AdminLayout: React.FC = () => {
           selectedKeys={[location.pathname]}
         >
           <Menu.Item key="/profile" icon={<UserOutlined />}>Thông tin cá nhân</Menu.Item>
+          {user.role === 0 && (
+            <Menu.Item key="/criteria-management" icon={<TrophyOutlined />}>
+              Quản lý tiêu chí
+            </Menu.Item>
+          )}
         </Menu>
       </Sider>
 
