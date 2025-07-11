@@ -8,6 +8,7 @@ import {
   InputNumber,
   Space,
   Typography,
+  Select,
 } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
@@ -32,24 +33,28 @@ const initialData: Criteria[] = [
     name: 'I. Đánh giá về ý thức học tập',
     maxScore: 30,
     level: 1,
+    type: 'diem_ren_luyen',
     children: [
       {
         key: '1-1',
         name: 'Chuyên cần',
         description: 'Đi học đúng giờ, không bỏ tiết. Vi phạm 1 lần trừ 3 điểm.',
         maxScore: 20,
+        type: 'diem_ren_luyen',
       },
       {
         key: '1-2',
         name: 'Thực hiện nghĩa vụ học tập',
         description: 'Nộp bài tập đúng hạn. Vi phạm 1 lần trừ 2 điểm.',
         maxScore: 5,
+        type: 'diem_ren_luyen',
       },
       {
         key: '1-3',
         name: 'Học lại, thi lại',
         description: 'Học lại, thi lại một môn trừ tối đa 5 điểm.',
         maxScore: 5,
+        type: 'diem_ren_luyen',
       },
     ],
   },
@@ -58,24 +63,28 @@ const initialData: Criteria[] = [
     name: 'II. Chấp hành nội quy, quy chế',
     maxScore: 25,
     level: 1,
+    type: 'diem_ren_luyen',
     children: [
       {
         key: '2-1',
         name: 'Thực hiện đầy đủ thủ tục hành chính',
         description: 'Hoàn thành kê khai, đăng ký.',
         maxScore: 10,
+        type: 'diem_ren_luyen',
       },
       {
         key: '2-2',
         name: 'Tham gia sinh hoạt công dân',
         description: 'Sinh hoạt đầu năm, giữa kỳ...',
         maxScore: 5,
+        type: 'diem_ren_luyen',
       },
       {
         key: '2-3',
         name: 'Không vi phạm nội quy',
         description: 'Không bị nhắc nhở, đóng học phí đầy đủ...',
         maxScore: 10,
+        type: 'diem_ren_luyen',
       },
     ],
   },
@@ -84,18 +93,21 @@ const initialData: Criteria[] = [
     name: 'III. Tham gia hoạt động chính trị, xã hội, thể thao...',
     maxScore: 20,
     level: 1,
+    type: 'diem_ren_luyen',
     children: [
       {
         key: '3-1',
         name: 'Tham gia hoạt động tình nguyện, thể thao...',
         description: 'Từ đoàn trường, khoa, lớp, CTXH...',
         maxScore: 12,
+        type: 'diem_ren_luyen',
       },
       {
         key: '3-2',
         name: 'Tham gia tổ chức phong trào',
         description: 'Làm BTC, cán sự, cộng tác viên...',
         maxScore: 8,
+        type: 'diem_ren_luyen',
       },
     ],
   },
@@ -104,30 +116,35 @@ const initialData: Criteria[] = [
     name: 'IV. Phẩm chất công dân và quan hệ cộng đồng',
     maxScore: 15,
     level: 1,
+    type: 'diem_ren_luyen',
     children: [
       {
         key: '4-1',
         name: 'Chấp hành pháp luật',
         description: 'Không vi phạm pháp luật, nội quy',
         maxScore: 5,
+        type: 'diem_ren_luyen',
       },
       {
         key: '4-2',
         name: 'Tích cực hoạt động cộng đồng',
         description: 'Tuyên truyền pháp luật, bảo vệ môi trường...',
         maxScore: 3,
+        type: 'diem_ren_luyen',
       },
       {
         key: '4-3',
         name: 'Là cán bộ Đoàn, CLB, đội nhóm...',
         description: 'Sinh hoạt đều, có vai trò tích cực',
         maxScore: 2,
+        type: 'diem_ren_luyen',
       },
       {
         key: '4-4',
         name: 'Mối quan hệ tốt với tập thể',
         description: 'Không gây mất đoàn kết...',
         maxScore: 5,
+        type: 'diem_ren_luyen',
       },
     ],
   },
@@ -136,22 +153,26 @@ const initialData: Criteria[] = [
     name: 'V. Thành tích đặc biệt',
     maxScore: 10,
     level: 1,
+    type: 'diem_ren_luyen',
     children: [
       {
         key: '5-1',
         name: 'Tham gia đầy đủ tổng kết, họp lớp, khoa...',
         description: 'Không bị trừ điểm',
         maxScore: 5,
+        type: 'diem_ren_luyen',
       },
       {
         key: '5-2',
         name: 'Có thành tích học tập, rèn luyện, phong trào',
         description: 'Giấy khen, giải thưởng...',
         maxScore: 5,
+        type: 'diem_ren_luyen',
       },
     ],
   },
 ];
+
 
 const CriteriaManagement = () => {
   const [data, setData] = useState<Criteria[]>(initialData);
@@ -271,9 +292,19 @@ const CriteriaManagement = () => {
       <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal()}>
         Thêm tiêu chí
       </Button>
+      <Select
+        value={selectedType}
+        onChange={(value) => setSelectedType(value)}
+        style={{ width: 300, marginBottom: 16 }}
+        options={[
+            { label: 'Điểm rèn luyện', value: 'diem_ren_luyen' },
+            { label: 'Sinh viên 5 tốt', value: '5_tot' },
+            { label: 'SV tiên tiến làm theo lời Bác', value: 'tien_tien_lam_theo_loi_bac' },
+        ]}
+        />
       <Table
         columns={columns}
-        dataSource={data}
+        dataSource={data.filter(item => item.type === selectedType)}
         pagination={false}
         expandable={{ defaultExpandAllRows: true }}
         rowKey="key"
