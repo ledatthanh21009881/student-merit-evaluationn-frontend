@@ -12,6 +12,8 @@ import StudentProfile from './pages/StudentProfile';
 import PrivateRoute from './components/PrivateRoute';
 import AdminLayout from './pages/MenuLeft';
 import CriteriaManagement from './pages/CriteriaManagement';
+import CriteriaTypeManagement from './pages/CriteriaTypeManagement';
+import CriteriaFormManagement from './pages/CriteriaFormManagement';
 
 const App: React.FC = () => {
   return (
@@ -33,6 +35,8 @@ const App: React.FC = () => {
           >
             <Route path="/profile" element={<StudentProfile />} />
             <Route path="/criteria-management" element={<CriteriaManagement />} />
+            <Route path="/criteria-type-management" element={<CriteriaTypeManagement />} />
+            <Route path="/criteria-form-management" element={<CriteriaFormManagement />} />
           </Route>
 
           {/* Fallback nếu không đúng route */}

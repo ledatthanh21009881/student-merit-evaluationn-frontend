@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Table,
   Button,
@@ -9,332 +9,224 @@ import {
   Space,
   Typography,
   Select,
+  Checkbox,
+  message,
 } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import type { ColumnsType } from 'antd/es/table';
+import {
+  getAllCriteria,
+  createCriteria,
+  updateCriteria,
+  deleteCriteria,
+  getAllCriteriaTypes,
+  CriteriaRequest,
+  CriteriaResponse,
+  CriteriaTypeItem,
+} from '../services/criteriaService';
 
 const { Title } = Typography;
 const { TextArea } = Input;
-export type CriteriaType = 'diem_ren_luyen' | '5_tot' | 'tien_tien_lam_theo_loi_bac';
-
-interface Criteria {
-  key: string;
-  name: string;
-  description?: string;
-  maxScore?: number;
-  level?: number;
-  children?: Criteria[];
-  type?: CriteriaType;
-}
-
-const initialData: Criteria[] = [
-  {
-    key: '1',
-    name: 'I. Đánh giá về ý thức học tập',
-    maxScore: 30,
-    level: 1,
-    type: 'diem_ren_luyen',
-    children: [
-      {
-        key: '1-1',
-        name: 'Chuyên cần',
-        description: 'Đi học đúng giờ, không bỏ tiết. Vi phạm 1 lần trừ 3 điểm.',
-        maxScore: 20,
-        type: 'diem_ren_luyen',
-      },
-      {
-        key: '1-2',
-        name: 'Thực hiện nghĩa vụ học tập',
-        description: 'Nộp bài tập đúng hạn. Vi phạm 1 lần trừ 2 điểm.',
-        maxScore: 5,
-        type: 'diem_ren_luyen',
-      },
-      {
-        key: '1-3',
-        name: 'Học lại, thi lại',
-        description: 'Học lại, thi lại một môn trừ tối đa 5 điểm.',
-        maxScore: 5,
-        type: 'diem_ren_luyen',
-      },
-    ],
-  },
-  {
-    key: '2',
-    name: 'II. Chấp hành nội quy, quy chế',
-    maxScore: 25,
-    level: 1,
-    type: 'diem_ren_luyen',
-    children: [
-      {
-        key: '2-1',
-        name: 'Thực hiện đầy đủ thủ tục hành chính',
-        description: 'Hoàn thành kê khai, đăng ký.',
-        maxScore: 10,
-        type: 'diem_ren_luyen',
-      },
-      {
-        key: '2-2',
-        name: 'Tham gia sinh hoạt công dân',
-        description: 'Sinh hoạt đầu năm, giữa kỳ...',
-        maxScore: 5,
-        type: 'diem_ren_luyen',
-      },
-      {
-        key: '2-3',
-        name: 'Không vi phạm nội quy',
-        description: 'Không bị nhắc nhở, đóng học phí đầy đủ...',
-        maxScore: 10,
-        type: 'diem_ren_luyen',
-      },
-    ],
-  },
-  {
-    key: '3',
-    name: 'III. Tham gia hoạt động chính trị, xã hội, thể thao...',
-    maxScore: 20,
-    level: 1,
-    type: 'diem_ren_luyen',
-    children: [
-      {
-        key: '3-1',
-        name: 'Tham gia hoạt động tình nguyện, thể thao...',
-        description: 'Từ đoàn trường, khoa, lớp, CTXH...',
-        maxScore: 12,
-        type: 'diem_ren_luyen',
-      },
-      {
-        key: '3-2',
-        name: 'Tham gia tổ chức phong trào',
-        description: 'Làm BTC, cán sự, cộng tác viên...',
-        maxScore: 8,
-        type: 'diem_ren_luyen',
-      },
-    ],
-  },
-  {
-    key: '4',
-    name: 'IV. Phẩm chất công dân và quan hệ cộng đồng',
-    maxScore: 15,
-    level: 1,
-    type: 'diem_ren_luyen',
-    children: [
-      {
-        key: '4-1',
-        name: 'Chấp hành pháp luật',
-        description: 'Không vi phạm pháp luật, nội quy',
-        maxScore: 5,
-        type: 'diem_ren_luyen',
-      },
-      {
-        key: '4-2',
-        name: 'Tích cực hoạt động cộng đồng',
-        description: 'Tuyên truyền pháp luật, bảo vệ môi trường...',
-        maxScore: 3,
-        type: 'diem_ren_luyen',
-      },
-      {
-        key: '4-3',
-        name: 'Là cán bộ Đoàn, CLB, đội nhóm...',
-        description: 'Sinh hoạt đều, có vai trò tích cực',
-        maxScore: 2,
-        type: 'diem_ren_luyen',
-      },
-      {
-        key: '4-4',
-        name: 'Mối quan hệ tốt với tập thể',
-        description: 'Không gây mất đoàn kết...',
-        maxScore: 5,
-        type: 'diem_ren_luyen',
-      },
-    ],
-  },
-  {
-    key: '5',
-    name: 'V. Thành tích đặc biệt',
-    maxScore: 10,
-    level: 1,
-    type: 'diem_ren_luyen',
-    children: [
-      {
-        key: '5-1',
-        name: 'Tham gia đầy đủ tổng kết, họp lớp, khoa...',
-        description: 'Không bị trừ điểm',
-        maxScore: 5,
-        type: 'diem_ren_luyen',
-      },
-      {
-        key: '5-2',
-        name: 'Có thành tích học tập, rèn luyện, phong trào',
-        description: 'Giấy khen, giải thưởng...',
-        maxScore: 5,
-        type: 'diem_ren_luyen',
-      },
-    ],
-  },
-];
-
 
 const CriteriaManagement = () => {
-  const [data, setData] = useState<Criteria[]>(initialData);
+  const [data, setData] = useState<CriteriaResponse[]>([]);
+  const [criteriaTypes, setCriteriaTypes] = useState<CriteriaTypeItem[]>([]);
+  const [selectedType, setSelectedType] = useState<number | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editing, setEditing] = useState<Criteria | null>(null);
-  const [selectedType, setSelectedType] = useState<CriteriaType>('diem_ren_luyen');
+  const [editing, setEditing] = useState<CriteriaResponse | null>(null);
   const [form] = Form.useForm();
 
-  const openModal = (record?: Criteria | null, parentKey?: string) => {
-    setEditing(record ? { ...record, parentKey } : { parentKey } as any);
-    form.setFieldsValue(record || {});
-    setModalOpen(true);
-  };
-
-  const handleDelete = (record: Criteria, parentKey?: string) => {
-    if (parentKey) {
-      setData(prev =>
-        prev.map(d =>
-          d.key === parentKey
-            ? {
-                ...d,
-                children: d.children?.filter(c => c.key !== record.key),
-              }
-            : d
-        )
-      );
-    } else {
-      setData(prev => prev.filter(d => d.key !== record.key));
+  const fetchData = async () => {
+    try {
+      const res = await getAllCriteria();
+      setData(res);
+    } catch {
+      message.error('Lỗi khi tải tiêu chí');
     }
   };
 
-  const handleSubmit = () => {
-    form.validateFields().then(values => {
-      const newItem: Criteria = {
-        key: editing?.key || Date.now().toString(),
-        ...values,
-        type: selectedType,
-      };
-      if (editing?.key) {
-        if ((editing as any).parentKey) {
-          setData(prev =>
-            prev.map(d =>
-              d.key === (editing as any).parentKey
-                ? {
-                    ...d,
-                    children: d.children?.map(c =>
-                      c.key === editing.key ? newItem : c
-                    ),
-                  }
-                : d
-            )
-          );
-        } else {
-          setData(prev => prev.map(d => (d.key === editing.key ? newItem : d)));
-        }
-      } else {
-        if ((editing as any)?.parentKey) {
-          setData(prev =>
-            prev.map(d =>
-              d.key === (editing as any).parentKey
-                ? {
-                    ...d,
-                    children: [...(d.children || []), newItem],
-                  }
-                : d
-            )
-          );
-        } else {
-          setData(prev => [...prev, { ...newItem, children: [] }]);
-        }
+  const fetchCriteriaTypes = async () => {
+    try {
+      const res = await getAllCriteriaTypes();
+      setCriteriaTypes(res);
+      if (res.length > 0 && selectedType === null) {
+        setSelectedType(res[0].criteriaTypeID); // mặc định chọn loại đầu tiên
       }
-      setModalOpen(false);
-    });
+    } catch {
+      message.error('Lỗi khi tải loại tiêu chí');
+    }
   };
 
-  const columns: ColumnsType<Criteria> = [
-    {
-      title: 'Tên tiêu chí',
-      dataIndex: 'name',
-      key: 'name',
-    },
-    {
-      title: 'Mô tả',
-      dataIndex: 'description',
-      key: 'description',
-    },
-    {
-      title: 'Điểm tối đa',
-      dataIndex: 'maxScore',
-      key: 'maxScore',
-    },
+  useEffect(() => {
+    fetchData();
+    fetchCriteriaTypes();
+  }, []);
+
+  const openModal = (record?: CriteriaResponse | null, parentID?: number | null) => {
+    const editingData = record ? { ...record, parentID: record.parentID } : parentID ? { parentID } as any : null;
+    setEditing(editingData);
+    form.setFieldsValue({
+      criteriaName: record?.criteriaName || '',
+      description: record?.description || '',
+      maxScore: record?.maxScore || 0,
+      isStudentScored: record?.isStudentScored ?? true,
+      isAdminScored: record?.isAdminScored ?? false,
+      isUploadOnly: record?.isUploadOnly ?? false,
+      isActive: record?.isActive ?? true,
+    });
+    setModalOpen(true);
+  };
+
+  const handleDelete = async (record: CriteriaResponse) => {
+    try {
+      await deleteCriteria(record.criteriaID);
+      message.success('Đã xoá thành công');
+      fetchData();
+    } catch {
+      message.error('Xoá thất bại');
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+      const isChild = editing?.parentID || editing?.level === 2;
+      const payload: CriteriaRequest = {
+        criteriaName: values.criteriaName,
+        description: isChild ? values.description : '',
+        maxScore: isChild ? values.maxScore : 0,
+        level: isChild ? 2 : 1,
+        isStudentScored: isChild ? values.isStudentScored : false,
+        isAdminScored: isChild ? values.isAdminScored : false,
+        isUploadOnly: isChild ? values.isUploadOnly : false,
+        isActive: isChild ? values.isActive : true,
+        criteriaTypeID: selectedType!,
+        parentID: editing?.parentID || null,
+      };
+
+      if (editing?.criteriaID) {
+        await updateCriteria(editing.criteriaID, payload);
+        message.success('Cập nhật thành công');
+      } else {
+        await createCriteria(payload);
+        message.success('Tạo mới thành công');
+      }
+
+      setModalOpen(false);
+      fetchData();
+    } catch (error) {
+      message.error('Lỗi xử lý dữ liệu');
+    }
+  };
+
+  const filterByType = (list: CriteriaResponse[], typeID: number): CriteriaResponse[] => {
+    return list
+      .filter(item => item.criteriaTypeName && criteriaTypes.find(c => c.criteriaTypeID === typeID)?.criteriaTypeName === item.criteriaTypeName)
+      .map(item => ({
+        ...item,
+        key: item.criteriaID.toString(),
+        children: item.children ? filterByType(item.children, typeID) : undefined,
+      }));
+  };
+
+  const columns: ColumnsType<CriteriaResponse> = [
+    { title: 'Tên tiêu chí', dataIndex: 'criteriaName', key: 'criteriaName' },
+    { title: 'Mô tả', dataIndex: 'description', key: 'description' },
+    { title: 'Điểm tối đa', dataIndex: 'maxScore', key: 'maxScore' },
     {
       title: 'Thao tác',
       key: 'action',
       render: (_, record) => (
         <Space>
-          <Button icon={<EditOutlined />} onClick={() => openModal(record)}>
-            Sửa
-          </Button>
-          <Button
-            icon={<DeleteOutlined />}
-            danger
-            onClick={() => handleDelete(record)}
-          >
-            Xoá
-          </Button>
-          <Button onClick={() => openModal(null, record.key)}>➕ Con</Button>
+          <Button icon={<EditOutlined />} onClick={() => openModal(record)}>Sửa</Button>
+          <Button icon={<DeleteOutlined />} danger onClick={() => handleDelete(record)}>Xoá</Button>
+          <Button onClick={() => openModal(null, record.criteriaID)}>➕ Con</Button>
         </Space>
       ),
       width: 220,
     },
   ];
 
+  const handleMutualExclusion = (field: 'isStudentScored' | 'isAdminScored') => {
+    const current = form.getFieldValue(field);
+    if (field === 'isStudentScored') {
+      form.setFieldsValue({ isStudentScored: current, isAdminScored: !current });
+    } else {
+      form.setFieldsValue({ isStudentScored: !current, isAdminScored: current });
+    }
+  };
+
+  const isEditingChild = editing?.level === 2 || editing?.parentID;
+
   return (
     <div style={{ padding: 24 }}>
       <Title level={3}>📋 Quản lý tiêu chí</Title>
-      <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal()}>
-        Thêm tiêu chí
+      <Button type="primary" icon={<PlusOutlined />} onClick={() => openModal(null)}>
+        Thêm tiêu chí cha
       </Button>
+
       <Select
-        value={selectedType}
-        onChange={(value) => setSelectedType(value)}
-        style={{ width: 300, marginBottom: 16 }}
-        options={[
-            { label: 'Điểm rèn luyện', value: 'diem_ren_luyen' },
-            { label: 'Sinh viên 5 tốt', value: '5_tot' },
-            { label: 'SV tiên tiến làm theo lời Bác', value: 'tien_tien_lam_theo_loi_bac' },
-        ]}
-        />
+        value={selectedType ?? undefined}
+        onChange={value => setSelectedType(value)}
+        style={{ width: 300, marginBottom: 16, marginLeft: 16 }}
+        options={criteriaTypes.map(type => ({
+          label: type.criteriaTypeName,
+          value: type.criteriaTypeID,
+        }))}
+      />
+
       <Table
         columns={columns}
-        dataSource={data.filter(item => item.type === selectedType)}
+        dataSource={selectedType ? filterByType(data, selectedType) : []}
         pagination={false}
         expandable={{ defaultExpandAllRows: true }}
-        rowKey="key"
+        rowKey="criteriaID"
         style={{ marginTop: 20 }}
       />
 
       <Modal
         open={modalOpen}
-        title={editing?.key ? 'Cập nhật tiêu chí' : 'Thêm tiêu chí'}
+        title={
+          editing?.criteriaID
+            ? 'Cập nhật tiêu chí'
+            : editing?.parentID
+            ? 'Thêm tiêu chí con'
+            : 'Thêm tiêu chí cha'
+        }
         onCancel={() => setModalOpen(false)}
         onOk={handleSubmit}
       >
         <Form form={form} layout="vertical">
-          <Form.Item
-            name="name"
-            label="Tên tiêu chí"
-            rules={[{ required: true }]}
-          >
+          <Form.Item name="criteriaName" label="Tên tiêu chí" rules={[{ required: true }]}>
             <Input />
           </Form.Item>
-          <Form.Item name="description" label="Mô tả">
-            <TextArea rows={3} />
-          </Form.Item>
-          <Form.Item
-            name="maxScore"
-            label="Điểm tối đa"
-            rules={[{ required: true }]}
-          >
-            <InputNumber min={0} style={{ width: '100%' }} />
-          </Form.Item>
+
+          {isEditingChild && (
+            <>
+              <Form.Item name="description" label="Mô tả">
+                <TextArea rows={3} />
+              </Form.Item>
+              <Form.Item name="maxScore" label="Điểm tối đa" rules={[{ required: true }]}>
+                <InputNumber min={0} style={{ width: '100%' }} />
+              </Form.Item>
+              <Form.Item name="isStudentScored" valuePropName="checked">
+                <Checkbox onChange={() => handleMutualExclusion('isStudentScored')}>
+                  Cho phép sinh viên tự đánh giá
+                </Checkbox>
+              </Form.Item>
+              <Form.Item name="isAdminScored" valuePropName="checked">
+                <Checkbox onChange={() => handleMutualExclusion('isAdminScored')}>
+                  Cho phép Admin đánh giá
+                </Checkbox>
+              </Form.Item>
+              <Form.Item name="isUploadOnly" valuePropName="checked">
+                <Checkbox>Chỉ được upload minh chứng</Checkbox>
+              </Form.Item>
+              <Form.Item name="isActive" valuePropName="checked">
+                <Checkbox>Kích hoạt tiêu chí</Checkbox>
+              </Form.Item>
+            </>
+          )}
         </Form>
       </Modal>
     </div>

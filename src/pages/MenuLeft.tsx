@@ -40,6 +40,7 @@ const AdminLayout: React.FC = () => {
     <Menu onClick={handleMenuClick}>
       {/* <Menu.Item key="/change-password" icon={<LockOutlined />}>Đổi mật khẩu</Menu.Item> */}
       <Menu.Item key="logout" icon={<LogoutOutlined />} danger>Đăng xuất</Menu.Item>
+      
     </Menu>
   );
 
@@ -56,6 +57,16 @@ const AdminLayout: React.FC = () => {
           {user.role === 0 && (
             <Menu.Item key="/criteria-management" icon={<TrophyOutlined />}>
               Quản lý tiêu chí
+            </Menu.Item>
+          )}
+          {user.role === 0 && (
+            <Menu.Item key="/criteria-type-management" icon={<TrophyOutlined />}>
+              Quản lý loại tiêu chí
+            </Menu.Item>
+          )}
+          {user.role === 0 && (
+            <Menu.Item key="/criteria-form-management" icon={<TrophyOutlined />}>
+              Quản lý biểu mẫu đánh giá
             </Menu.Item>
           )}
         </Menu>
